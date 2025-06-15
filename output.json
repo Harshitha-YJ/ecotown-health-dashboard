@@ -1,0 +1,25 @@
+{
+  "biomarkers": {
+    "Triglycerides": [
+      {
+        "date": "2024-03-20",
+        "value": 178.0,
+        "unit": "",
+        "status": "Borderline"
+      }
+    ],
+    "Potassium": [
+      {
+        "date": "2025-06-15",
+        "value": 6.5,
+        "unit": "%",
+        "status": "Unknown"
+      }
+    ]
+  },
+  "metadata": {
+    "report_date": "2024-03-20",
+    "patient_name": "s with cancers of the gastrointestinal tract",
+    "patient_gender": "M"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "name": "ecotown-health-dashboard",
+  "version": "1.0.0",
+  "description": "Interactive biomarker visualization dashboard for health data analysis",
+  "main": "index.html",
+  "scripts": {
+    "start": "live-server --port=3000 --open=/index.html",
+    "dev": "live-server --port=3000 --watch=assets/",
+    "build": "echo 'Building for production...' && npm run minify",
+    "minify": "terser assets/js/*.js -o assets/js/app.min.js",
+    "test": "echo 'Running tests...' && node tests/run-tests.js",
+    "deploy": "echo 'Deploying to production...'",
+    "lint": "eslint assets/js/",
+    "format": "prettier --write assets/"
+  },
+  "keywords": [
+    "health",
+    "biomarkers",
+    "dashboard",
+    "visualization",
+    "medical",
+    "charts",
+    "analytics"
+  ],
+  "author": "EcoTown Health Team",
+  "license": "MIT",
+  "devDependencies": {
+    "live-server": "^1.2.2",
+    "terser": "^5.19.0",
+    "eslint": "^8.45.0",
+    "prettier": "^3.0.0"
+  },
+  "dependencies": {
+    "chart.js": "^4.3.0",
+    "chartjs-adapter-date-fns": "^3.0.0",
+    "date-fns": "^2.30.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ecotown/health-dashboard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ecotown/health-dashboard/issues"
+  },
+  "homepage": "https://github.com/ecotown/health-dashboard#readme",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  }
+}

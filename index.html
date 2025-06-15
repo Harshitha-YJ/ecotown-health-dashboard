@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoTown Health - Biomarker Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/2.29.3/index.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f5f7fb;
+
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background: rgba(216, 126, 23, 0.177);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.05);
+            margin: 40px auto;
+            max-width: 1200px;
+        }
+
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+        }
+
+        .title-section h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .title-section p {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .date-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .date-input {
+            padding: 12px 16px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            font-size: 14px;
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .upload-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+        }
+
+        .upload-area:hover {
+            border-color: #764ba2;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .upload-subtext {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .main-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .side-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .chart-container {
+        position: relative;
+        min-height: 400px;
+        margin-bottom: 30px;
+        }
+
+
+        canvas#mainChart {
+            display: block;
+            width: 100%;
+            height: auto;
+            max-width: 100%;
+        }
+
+
+
+        .biomarker-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            background: #f8f9fa;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .tab-button.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .biomarker-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e1e5e9;
+            transition: all 0.3s ease;
+        }
+
+        .biomarker-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .card-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .card-trend {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 14px;
+        }
+
+        .trend-up {
+            color: #10b981;
+        }
+
+        .trend-down {
+            color: #ef4444;
+        }
+
+        .trend-stable {
+            color: #6b7280;
+        }
+
+        .range-indicator {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        .range-fill {
+            height: 100%;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .range-normal {
+            background: linear-gradient(90deg, #10b981, #34d399);
+        }
+
+        .range-warning {
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+        }
+
+        .range-danger {
+            background: linear-gradient(90deg, #ef4444, #f87171);
+        }
+
+        .controls-panel {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .control-button {
+            padding: 10px 20px;
+            border: 2px solid #e1e5e9;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .control-button:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .control-button.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: transparent;
+        }
+
+        .insights-section {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+            border-radius: 16px;
+            padding: 25px;
+            margin-top: 20px;
+        }
+
+        .insights-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .insight-item {
+            display: flex;
+            align-items: start;
+            gap: 10px;
+            margin-bottom: 12px;
+            padding: 12px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .insight-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .insight-normal {
+            background: #10b981;
+        }
+
+        .insight-warning {
+            background: #f59e0b;
+        }
+
+        .insight-danger {
+            background: #ef4444;
+        }
+
+        .insight-text {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .export-btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .date-controls {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            .biomarker-tabs {
+                justify-content: center;
+            }
+        }
+
+        .sample-data-btn {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 500;
+            margin-left: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .sample-data-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        }
+    </style>
+</head>
+<!-- Load libraries -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+
+<!-- App logic scripts -->
+<script src="assets/js/utils.js"></script>
+<script src="assets/js/chart-config.js"></script>
+<script src="assets/js/data-processor.js"></script>
+<script src="assets/js/app.js"></script>
+
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <div class="header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <div class="title-section">
+                        <h1>EcoTown Health Dashboard</h1>
+                        <p>Advanced Biomarker Time Series Analysis</p>
+                    </div>
+                </div>
+                <div class="date-controls">
+                    <input type="date" id="startDate" class="date-input" value="2024-01-01">
+                    <input type="date" id="endDate" class="date-input" value="2024-12-31">
+                    <button class="sample-data-btn" onclick="loadSampleData()">
+                        <i class="fas fa-database"></i> Load Sample Data
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upload Section -->
+        <div class="upload-section">
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div class="upload-text">Upload Health Reports</div>
+                <div class="upload-subtext">Drag & drop PDF files or click to browse (PDF, CSV, JSON)</div>
+                <input type="file" id="fileInput" class="file-input" multiple accept=".pdf,.csv,.json" onchange="handleFileUpload(event)">
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Processing health data...</p>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            <!-- Main Panel -->
+            <div class="main-panel">
+                <div class="biomarker-tabs">
+                    <button class="tab-button active" onclick="switchBiomarker('lipid')">Lipid Profile</button>
+                    <button class="tab-button" onclick="switchBiomarker('kidney')">Kidney Function</button>
+                    <button class="tab-button" onclick="switchBiomarker('vitamins')">Vitamins</button>
+                    <button class="tab-button" onclick="switchBiomarker('diabetes')">Diabetes</button>
+                    <button class="tab-button" onclick="switchBiomarker('all')">All Biomarkers</button>
+                </div>
+
+                <div class="controls-panel">
+                    <button class="control-button active" onclick="setTimeRange('3m')">3M</button>
+                    <button class="control-button" onclick="setTimeRange('6m')">6M</button>
+                    <button class="control-button" onclick="setTimeRange('1y')">1Y</button>
+                    <button class="control-button" onclick="setTimeRange('all')">All</button>
+                    <button class="control-button" onclick="toggleNormalRanges()">
+                        <i class="fas fa-eye"></i> Normal Ranges
+                    </button>
+                </div>
+
+                <div class="chart-container">
+                    <canvas id="mainChart"></canvas>
+                </div>
+
+                <div class="export-buttons">
+                    <button class="export-btn" onclick="exportChart('png')">
+                        <i class="fas fa-download"></i> Export PNG
+                    </button>
+                    <button class="export-btn" onclick="exportChart('pdf')">
+                        <i class="fas fa-file-pdf"></i> Export PDF
+                    </button>
+                    <button class="export-btn" onclick="exportData()">
+                        <i class="fas fa-table"></i> Export Data
+                    </button>
+                </div>
+            </div>
+
+            <!-- Side Panel -->
+            <div class="side-panel">
+                <h3 style="margin-bottom: 20px; color: #333;">Current Values</h3>
+                <div id="biomarkerCards"></div>
+
+                <div class="insights-section">
+                    <div class="insights-title">
+                        <i class="fas fa-lightbulb"></i> Clinical Insights
+                    </div>
+                    <div id="insights"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+      
+
+        // Clinical reference ranges
+        const clinicalRanges = {
+            'Total Cholesterol': { normal: [0, 200], borderline: [200, 240], high: [240, 999], unit: 'mg/dL' },
+            'LDL': { normal: [0, 100], borderline: [100, 160], high: [160, 999], unit: 'mg/dL' },
+            'HDL': { normal: [40, 999], low: [0, 40], unit: 'mg/dL' },
+            'Triglycerides': { normal: [0, 150], borderline: [150, 200], high: [200, 999], unit: 'mg/dL' },
+            'Creatinine': { normal: [0.6, 1.3], high: [1.3, 999], unit: 'mg/dL' },
+            'Vitamin D': { deficient: [0, 20], insufficient: [20, 30], sufficient: [30, 999], unit: 'ng/mL' },
+            'Vitamin B12': { deficient: [0, 300], low: [300, 400], normal: [400, 999], unit: 'pg/mL' },
+            'HbA1c': { normal: [0, 5.7], prediabetic: [5.7, 6.5], diabetic: [6.5, 999], unit: '%' }
+        };
+
+        // Sample data generator
+        function generateSampleData() {
+            const startDate = new Date('2024-01-01');
+            const endDate = new Date('2024-12-31');
+            const data = {};
+
+            const biomarkers = [
+                'Total Cholesterol', 'LDL', 'HDL', 'Triglycerides',
+                'Creatinine', 'Vitamin D', 'Vitamin B12', 'HbA1c'
+            ];
+
+            const baseValues = {
+                'Total Cholesterol': 180,
+                'LDL': 100,
+                'HDL': 50,
+                'Triglycerides': 120,
+                'Creatinine': 1.0,
+                'Vitamin D': 35,
+                'Vitamin B12': 450,
+                'HbA1c': 5.4
+            };
+
+            biomarkers.forEach(biomarker => {
+                data[biomarker] = [];
+                const baseValue = baseValues[biomarker];
+                let currentValue = baseValue;
+
+                for (let d = new Date(startDate); d <= endDate; d.setMonth(d.getMonth() + 1)) {
+                    // Add some realistic variation
+                    const variation = (Math.random() - 0.5) * 0.2 * baseValue;
+                    currentValue = Math.max(0, baseValue + variation);
+                    
+                    data[biomarker].push({
+                        date: new Date(d).toISOString().split('T')[0],
+                        value: Math.round(currentValue * 10) / 10
+                    });
+                }
+            });
+
+            return data;
+        }
+
+        // Load sample data
+        function loadSampleData() {
+            document.getElementById('loading').style.display = 'block';
+            
+            setTimeout(() => {
+                healthData = generateSampleData();
+                document.getElementById('loading').style.display = 'none';
+                updateDashboard();
+                showNotification('Sample data loaded successfully!', 'success');
+            }, 1500);
+        }
+
+        // File upload handler
+        function handleFileUpload(event) {
+            const files = event.target.files;
+            if (files.length === 0) return;
+
+            document.getElementById('loading').style.display = 'block';
+
+            // Simulate file processing
+            setTimeout(() => {
+                // For demo purposes, load sample data
+                healthData = generateSampleData();
+                document.getElementById('loading').style.display = 'none';
+                updateDashboard();
+                showNotification(`${files.length} file(s) processed successfully!`, 'success');
+            }, 2000);
+        }
+
+        // Switch biomarker view
+        function switchBiomarker(type) {
+            currentBiomarker = type;
+            
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            updateChart();
+        }
+
+        // Set time range
+        function setTimeRange(range) {
+            document.querySelectorAll('.control-button').forEach(btn => {
+                if (btn.textContent.includes('M') || btn.textContent.includes('Y') || btn.textContent === 'All') {
+                    btn.classList.remove('active');
+                }
+            });
+            event.target.classList.add('active');
+            
+            // Filter data based on range and update chart
+            updateChart();
+        }
+
+        // Toggle normal ranges
+        function toggleNormalRanges() {
+            showNormalRanges = !showNormalRanges;
+            updateChart();
+        }
+
+        // Update entire dashboard
+        function updateDashboard() {
+            updateChart();
+            updateBiomarkerCards();
+            updateInsights();
+        }
+
+        // Update main chart
+        function updateChart() {
+            if (!healthData || Object.keys(healthData).length === 0) {
+                return;
+            }
+
+            const canvas = document.getElementById('mainChart');
+            const ctx = canvas.getContext('2d');
+
+            // 🔍 Fix blurry chart on high-DPI displays
+            // ✅ Use Chart.js built-in devicePixelRatio option
+        Chart.defaults.devicePixelRatio = window.devicePixelRatio || 1;
+
+
+            
+            if (currentChart) {
+                currentChart.destroy();
+            }
+
+            const datasets = [];
+            const colors = [
+                '#667eea', '#764ba2', '#f093fb', '#f5576c',
+                '#4facfe', '#00f2fe', '#43e97b', '#38f9d7'
+            ];
+
+            let biomarkersToShow = [];
+            
+            switch (currentBiomarker) {
+                case 'lipid':
+                    biomarkersToShow = ['Total Cholesterol', 'LDL', 'HDL', 'Triglycerides'];
+                    break;
+                case 'kidney':
+                    biomarkersToShow = ['Creatinine'];
+                    break;
+                case 'vitamins':
+                    biomarkersToShow = ['Vitamin D', 'Vitamin B12'];
+                    break;
+                case 'diabetes':
+                    biomarkersToShow = ['HbA1c'];
+                    break;
+                case 'all':
+                    biomarkersToShow = Object.keys(healthData);
+                    break;
+            }
+
+            biomarkersToShow.forEach((biomarker, index) => {
+                if (healthData[biomarker]) {
+                    datasets.push({
+                        label: biomarker,
+                        data: healthData[biomarker].map(item => ({
+                            x: item.date,
+                            y: item.value
+                        })),
+                        borderColor: colors[index % colors.length],
+                        backgroundColor: colors[index % colors.length] + '20',
+                        borderWidth: 3,
+                        fill: false,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: colors[index % colors.length],
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    });
+                }
+            });
+
+            currentChart = new Chart(ctx, {
+                type: 'line',
+                data: { datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `${currentBiomarker.charAt(0).toUpperCase() + currentBiomarker.slice(1)} Biomarker Trends`,
+                            font: { size: 18, weight: 'bold' },
+                            padding: 20
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                usePointStyle: true,
+                                padding: 15,
+                                font: { size: 12 }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: '#667eea',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: true,
+                            callbacks: {
+                                label: function(context) {
+                                    const range = clinicalRanges[context.dataset.label];
+                                    const unit = range ? range.unit : '';
+                                    return `${context.dataset.label}: ${context.parsed.y} ${unit}`;
+                                },
+                                afterLabel: function(context) {
+                                    const biomarker = context.dataset.label;
+                                    const value = context.parsed.y;
+                                    return getValueStatus(biomarker, value);
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            time: {
+                                parser: 'YYYY-MM-DD',
+                                displayFormats: {
+                                    month: 'MMM YYYY'
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Date',
+                                font: { size: 14, weight: 'bold' }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Value',
+                                font: { size: 14, weight: 'bold' }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    },
+                    animation: {
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+
+        // Update biomarker cards
+        function updateBiomarkerCards() {
+            if (!healthData || Object.keys(healthData).length === 0) {
+                return;
+            }
+
+            const cardsContainer = document.getElementById('biomarkerCards');
+            cardsContainer.innerHTML = '';
+
+            Object.keys(healthData).forEach(biomarker => {
+                const data = healthData[biomarker];
+                if (data.length === 0) return;
+
+                const latestValue = data[data.length - 1].value;
+                const previousValue = data.length > 1 ? data[data.length - 2].value : latestValue;
+                const trend = latestValue > previousValue ? 'up' : latestValue < previousValue ? 'down' : 'stable';
+                const trendPercent = previousValue !== 0 ? Math.abs(((latestValue - previousValue) / previousValue) * 100).toFixed(1) : 0;
+
+                const range = clinicalRanges[biomarker];
+                const unit = range ? range.unit : '';
+                const status = getValueStatus(biomarker, latestValue);
+                const statusClass = getStatusClass(biomarker, latestValue);
+
+                const card = document.createElement('div');
+                card.className = 'biomarker-card';
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div class="card-title">${biomarker}</div>
+                    </div>
+                    <div class="card-value ${statusClass}">${latestValue} ${unit}</div>
+                    <div class="card-trend trend-${trend}">
+                        <i class="fas fa-arrow-${trend === 'up' ? 'up' : trend === 'down' ? 'down' : 'right'}"></i>
+                        ${trend !== 'stable' ? `${trendPercent}%` : 'No change'}
+                    </div>
+                    <div class="range-indicator">
+                        <div class="range-fill ${statusClass.replace('card-value', 'range')}" style="width: ${getProgressWidth(biomarker, latestValue)}%"></div>
+                    </div>
+                    <div style="font-size: 12px; color: #666; margin-top: 8px;">${status}</div>
+                `;
+                cardsContainer.appendChild(card);
+            });
+        }
+
+        // Update insights
+        function updateInsights() {
+            if (!healthData || Object.keys(healthData).length === 0) {
+                return;
+            }
+
+            const insightsContainer = document.getElementById('insights');
+            insightsContainer.innerHTML = '';
+
+            const insights = generateInsights();
+            
+            insights.forEach(insight => {
+                const insightElement = document.createElement('div');
+                insightElement.className = 'insight-item';
+                insightElement.innerHTML = `
+                    <div class="insight-icon insight-${insight.type}">
+                        <i class="fas fa-${insight.icon}"></i>
+                    </div>
+                    <div class="insight-text">${insight.text}</div>
+                `;
+                insightsContainer.appendChild(insightElement);
+            });
+        }
+
+        // Generate clinical insights
+        function generateInsights() {
+            const insights = [];
+            
+            Object.keys(healthData).forEach(biomarker => {
+                const data = healthData[biomarker];
+                if (data.length === 0) return;
+
+                const latestValue = data[data.length - 1].value;
+                const status = getValueStatus(biomarker, latestValue);
+                
+                if (status.includes('High') || status.includes('Low') || status.includes('Deficient')) {
+                    insights.push({
+                        type: 'warning',
+                        icon: 'exclamation-triangle',
+                        text: `${biomarker} is ${status.toLowerCase()}. Consider consulting your healthcare provider.`
+                    });
+                } else if (status.includes('Normal') || status.includes('Sufficient')) {
+                    insights.push({
+                        type: 'normal',
+                        icon: 'check',
+                        text: `${biomarker} levels are within normal range.`
+                    });
+                }
+
+                // Trend analysis
+                if (data.length > 1) {
+                    const trend = calculateTrend(data);
+                    if (Math.abs(trend) > 10) {
+                        insights.push({
+                            type: trend > 0 ? 'warning' : 'normal',
+                            icon: 'chart-line',
+                            text: `${biomarker} shows ${trend > 0 ? 'increasing' : 'decreasing'} trend over time.`
+                        });
+                    }
+                }
+            });
+
+            // Add general health insights
+            const cholesterol = healthData['Total Cholesterol'];
+            const hdl = healthData['HDL'];
+            if (cholesterol && hdl) {
+                const latestCholesterol = cholesterol[cholesterol.length - 1].value;
+                const latestHDL = hdl[hdl.length - 1].value;
+                const ratio = latestCholesterol / latestHDL;
+                
+                if (ratio > 5) {
+                    insights.push({
+                        type: 'warning',
+                        icon: 'heart',
+                        text: `Cholesterol to HDL ratio is ${ratio.toFixed(1)}. Ideal ratio is below 4.5.`
+                    });
+                } else {
+                    insights.push({
+                        type: 'normal',
+                        icon: 'heart',
+                        text: `Cholesterol to HDL ratio is healthy at ${ratio.toFixed(1)}.`
+                    });
+                }
+            }
+
+            return insights.slice(0, 6); // Limit to 6 insights
+        }
+
+        // Calculate trend percentage
+        function calculateTrend(data) {
+            if (data.length < 2) return 0;
+            
+            const firstValue = data[0].value;
+            const lastValue = data[data.length - 1].value;
+            
+            return ((lastValue - firstValue) / firstValue) * 100;
+        }
+
+        // Get value status
+        function getValueStatus(biomarker, value) {
+            const range = clinicalRanges[biomarker];
+            if (!range) return 'Unknown';
+
+            switch (biomarker) {
+                case 'Total Cholesterol':
+                case 'LDL':
+                case 'Triglycerides':
+                    if (value <= range.normal[1]) return 'Normal';
+                    if (value <= range.borderline[1]) return 'Borderline High';
+                    return 'High';
+                
+                case 'HDL':
+                    if (value >= range.normal[0]) return 'Normal';
+                    return 'Low';
+                
+                case 'Creatinine':
+                    if (value <= range.normal[1]) return 'Normal';
+                    return 'High';
+                
+                case 'Vitamin D':
+                    if (value >= range.sufficient[0]) return 'Sufficient';
+                    if (value >= range.insufficient[0]) return 'Insufficient';
+                    return 'Deficient';
+                
+                case 'Vitamin B12':
+                    if (value >= range.normal[0]) return 'Normal';
+                    if (value >= range.low[0]) return 'Low';
+                    return 'Deficient';
+                
+                case 'HbA1c':
+                    if (value < range.prediabetic[0]) return 'Normal';
+                    if (value < range.diabetic[0]) return 'Prediabetic';
+                    return 'Diabetic';
+                
+                default:
+                    return 'Unknown';
+            }
+        }
+
+        // Get status CSS class
+        function getStatusClass(biomarker, value) {
+            const status = getValueStatus(biomarker, value);
+            
+            if (status.includes('High') || status.includes('Diabetic') || status.includes('Deficient')) {
+                return 'trend-down'; // Red color
+            } else if (status.includes('Borderline') || status.includes('Prediabetic') || status.includes('Low') || status.includes('Insufficient')) {
+                return 'trend-stable'; // Orange color
+            } else {
+                return 'trend-up'; // Green color
+            }
+        }
+
+        // Get progress bar width
+        function getProgressWidth(biomarker, value) {
+            const range = clinicalRanges[biomarker];
+            if (!range) return 50;
+
+            // This is a simplified calculation - you'd want more sophisticated logic for each biomarker
+            const maxValue = Math.max(...Object.values(range).flat());
+            return Math.min((value / maxValue) * 100, 100);
+        }
+
+        // Export chart as image
+        function exportChart(format) {
+            if (!currentChart) {
+                showNotification('No chart to export', 'error');
+                return;
+            }
+
+            const link = document.createElement('a');
+            link.download = `biomarker_chart_${new Date().toISOString().split('T')[0]}.${format}`;
+            
+            if (format === 'png') {
+                link.href = currentChart.toBase64Image();
+            } else if (format === 'pdf') {
+                // For PDF export, you'd need a library like jsPDF
+                showNotification('PDF export feature coming soon!', 'info');
+                return;
+            }
+            
+            link.click();
+            showNotification(`Chart exported as ${format.toUpperCase()}`, 'success');
+        }
+
+        // Export data as CSV
+        function exportData() {
+            if (!healthData || Object.keys(healthData).length === 0) {
+                showNotification('No data to export', 'error');
+                return;
+            }
+
+            let csv = 'Date,Biomarker,Value,Unit,Status\n';
+            
+            Object.keys(healthData).forEach(biomarker => {
+                const range = clinicalRanges[biomarker];
+                const unit = range ? range.unit : '';
+                
+                healthData[biomarker].forEach(dataPoint => {
+                    const status = getValueStatus(biomarker, dataPoint.value);
+                    csv += `${dataPoint.date},${biomarker},${dataPoint.value},${unit},${status}\n`;
+                });
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `biomarker_data_${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            
+            showNotification('Data exported as CSV', 'success');
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 500;
+                z-index: 1000;
+                opacity: 0;
+                transform: translateX(100px);
+                transition: all 0.3s ease;
+            `;
+            
+            switch (type) {
+                case 'success':
+                    notification.style.background = 'linear-gradient(135deg, #10b981, #34d399)';
+                    break;
+                case 'error':
+                    notification.style.background = 'linear-gradient(135deg, #ef4444, #f87171)';
+                    break;
+                case 'info':
+                    notification.style.background = 'linear-gradient(135deg, #3b82f6, #60a5fa)';
+                    break;
+                default:
+                    notification.style.background = 'linear-gradient(135deg, #6b7280, #9ca3af)';
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '1';
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transform = 'translateX(100px)';
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // Initialize dashboard
+        function initializeDashboard() {
+            // Set default date range
+            const today = new Date();
+            const oneYearAgo = new Date(today.getFullYear() - 1, today.getMonth(), today.getDate());
+            
+            document.getElementById('endDate').value = today.toISOString().split('T')[0];
+            document.getElementById('startDate').value = oneYearAgo.toISOString().split('T')[0];
+            
+            // Show welcome message
+            showNotification('Welcome to EcoTown Health Dashboard!', 'info');
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
+            
+            // Date range change listeners
+            document.getElementById('startDate').addEventListener('change', updateChart);
+            document.getElementById('endDate').addEventListener('change', updateChart);
+        });
+
+        // Drag and drop functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const uploadArea = document.querySelector('.upload-area');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+            
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, highlight, false);
+            });
+            
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, unhighlight, false);
+            });
+            
+            uploadArea.addEventListener('drop', handleDrop, false);
+            
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            
+            function highlight(e) {
+                uploadArea.style.borderColor = '#764ba2';
+                uploadArea.style.background = 'linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1))';
+            }
+            
+            function unhighlight(e) {
+                uploadArea.style.borderColor = '#667eea';
+                uploadArea.style.background = 'linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05))';
+            }
+            
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                document.getElementById('fileInput').files = files;
+                handleFileUpload({ target: { files: files } });
+            }
+        });
+    </script>
+    
+</body>
+</html>
