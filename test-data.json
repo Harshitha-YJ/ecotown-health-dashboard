@@ -1,0 +1,37 @@
+{
+  "Patient Name": "John Doe",
+  "Reports": [
+    {
+      "Report Date": "2025-06-01",
+      "Biomarkers": {
+        "Hemoglobin": 13.5,
+        "WBC Count": 6200,
+        "RBC Count": 4.8,
+        "Platelet Count": 230000,
+        "Glucose (Fasting)": 92,
+        "Cholesterol (Total)": 185,
+        "Triglycerides": 150,
+        "HDL": 50,
+        "LDL": 110,
+        "Vitamin D": 25,
+        "Calcium": 9.2
+      }
+    },
+    {
+      "Report Date": "2025-05-01",
+      "Biomarkers": {
+        "Hemoglobin": 12.8,
+        "WBC Count": 5800,
+        "RBC Count": 4.5,
+        "Platelet Count": 210000,
+        "Glucose (Fasting)": 100,
+        "Cholesterol (Total)": 190,
+        "Triglycerides": 140,
+        "HDL": 48,
+        "LDL": 115,
+        "Vitamin D": 20,
+        "Calcium": 9.0
+      }
+    }
+  ]
+}
