@@ -100,3 +100,5 @@ Once a health report is uploaded and successfully parsed:
 To upload a sample report:
 1. Click the **"Upload Sample Report"** button on the top navigation bar.
 2. The dashboard will auto-populate with example biomarker data and render all features.
+
+3. To visit website , click on - https://harshitha-yj.github.io/ecotown-health-dashboard/
