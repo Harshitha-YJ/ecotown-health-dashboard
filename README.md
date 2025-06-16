@@ -102,3 +102,18 @@ To upload a sample report:
 2. The dashboard will auto-populate with example biomarker data and render all features.
 
 3. To visit website , click on - https://harshitha-yj.github.io/ecotown-health-dashboard/
+
+   ## 🔮 Future Enhancements
+
+The EcoTown Health Dashboard can be further improved and extended with the following features:
+
+- **User Authentication**: Allow users to create accounts and save historical reports for long-term tracking.
+- **Trend Analysis**: Generate trend graphs across multiple dates to detect changes in biomarker levels.
+- **Health Recommendations**: Provide dietary or lifestyle suggestions based on biomarker readings.
+- **Mobile Optimization**: Create a progressive web app (PWA) or responsive mobile-first design.
+- **Multilingual Support**: Support regional languages for broader accessibility.
+- **ML-Based Insights**: Use machine learning to predict health risk scores or forecast trends.
+- **Google Drive Integration**: Allow importing reports directly from user Google Drive folders.
+- **Doctor Portal**: A dashboard interface for clinicians to monitor multiple patients.
+
+These ideas aim to transform the dashboard from a static viewer into a smart personal health assistant.
