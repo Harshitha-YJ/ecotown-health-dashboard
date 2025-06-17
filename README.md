@@ -154,7 +154,7 @@ To upload a sample report:
 1. Click the **"Upload Sample Report"** button on the top navigation bar.
 2. The dashboard will auto-populate with example biomarker data and render all features.
 
-3. To visit website , click on - https://eco-frontend-nine.vercel.app/
+3. To visit website , click on -https://eco-frontend-2lh8.vercel.app/ 
 4. https://harshitha-yj.github.io/ecotown-health-dashboard/
 
    ## 🔮 Future Enhancements
