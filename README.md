@@ -82,6 +82,59 @@ ecotown-health-dashboard/
     ├── netlify.toml         # Netlify deployment config
 
 ```
+🚀 Deployment Instructions
+
+🌐 Frontend on Vercel
+
+Go to vercel.com and log in.
+
+Create a new project and link your eco-frontend GitHub repo.
+
+Set:
+
+Framework Preset: Other
+
+Build Command: leave empty
+
+Output Directory: .
+
+Deploy the project.
+
+✅ Make sure the /assets/data/sample-data.json file exists if your frontend is trying to load it.
+
+🖥️ Backend on Render
+
+Go to render.com and log in.
+
+Create a new web service and connect your eco-backend GitHub repo.
+
+Set:
+
+Build Command: pip install -r requirements.txt
+
+Start Command: gunicorn app:app
+
+Python Version: >=3.10 (in render.yaml or environment)
+
+Make sure flask, gunicorn, and flask_cors are listed in requirements.txt
+
+Deploy the service.
+
+🔁 Your backend should now be live at: https://your-backend.onrender.com
+
+🌐 Connecting Frontend to Backend
+
+Edit your app.js and replace the upload/sample fetch paths:
+
+const response = await fetch('https://eco-backened.onrender.com/upload', {
+  method: 'POST',
+  body: formData
+});
+
+const response = await fetch('https://eco-backened.onrender.com/sample');
+
+Then redeploy the frontend on Vercel.
+
 
 ## 🙋 Support
 
