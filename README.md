@@ -16,10 +16,15 @@ To provide a simple and intuitive health report dashboard for users based on the
 
 ## ⚙️ Technologies Used
 
-- **Frontend**: HTML5, CSS3, JavaScript (Chart.js for visualization)
-- **Backend**: Python (Flask framework)
-- **PDF Parsing**: pdfplumber
-- **Others**: Bootstrap (for styling), GitHub (for version control and hosting)
+| Category            | Tools/Technologies                                                                         |
+| ------------------- | ------------------------------------------------------------------------------------------ |
+| **Frontend**        | HTML5, CSS3, JavaScript (Chart.js for charts), Bootstrap 5                                 |
+| **Backend**         | Python, Flask (REST API for PDF upload & data processing)                                  |
+| **PDF Parsing**     | `pdfplumber` (to extract biomarker values from PDF reports)                                |
+| **Deployment**      | Vercel (Frontend), Render (Backend)                                                        |
+| **Version Control** | Git & GitHub                                                                               |
+| **Other**           | Fetch API (AJAX for frontend-backend communication), Date handling (`<input type="date">`) |
+
 
 ## 🔧 Setup Instructions
 
